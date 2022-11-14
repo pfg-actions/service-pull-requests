@@ -1,0 +1,28 @@
+name: 'Service pull requests actions'
+description: 'Service pull requests actions'
+inputs:
+  gh-token:
+    description: 'GitHub Token'
+    required: true
+  go-private:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.18.8'
+    - name: Go Config
+      run: |
+        git config --global url.https://x-access-token:${{ inputs.gh-token }}@github.com/.insteadOf https://github.com/
+        echo "GOPRIVATE=${{ inputs.go-private }}" >> $GITHUB_ENV
+      shell: bash
+    - name: Build
+      run: go build -v ./...
+      shell: bash
+    - name: Unit Tests
+      run: go test -cover -v ./...
+      shell: bash
